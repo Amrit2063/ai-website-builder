@@ -1,19 +1,19 @@
-import React from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import Home from "./pages/Home.jsx"
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import Home from "./pages/Home.jsx";
+import useGetCurrentUser from "./hooks/userGetCurrentUser.jsx";
 
-export const serverUrl= "http://localhost:5000"
+export const serverUrl = "http://localhost:5000";
 
 const App = () => {
-  return (
-    <div>
-        <BrowserRouter>
-        <Routes>
-            <Route path='/' element={<Home/>}/>
-        </Routes>
-        </BrowserRouter>
-    </div>
-  )
-}
+  useGetCurrentUser();
 
-export default App
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
+
+export default App;

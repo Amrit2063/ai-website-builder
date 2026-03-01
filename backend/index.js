@@ -4,6 +4,7 @@ import connectDb from "./config/db.js";
 import authRouter from "./routes/auth.routes.js"
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import userRouter from "./routes/user.routes.js";
 
 const app = express();
 dotenv.config()
@@ -13,11 +14,12 @@ const port =  process.env.PORT || 8000;
 //middleware
 app.use(express.json())//make sure to parse json body in request as it is sent from frontend as null by default
 app.use("/api/auth",authRouter)//use in every route in authRouter, add /api/auth before it
+app.use("/api/user",userRouter)
 app.use(cookieParser())//to parse cookies in request, as we are sending token in cookie from frontend, we need to parse it in backend to use it for authentication
 
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN, // your frontend port
+    origin: "http://localhost:5173", // your frontend port
     credentials: true,
   })
 );

@@ -12,7 +12,7 @@ const LoginModel = ({ open, onClose }) => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
       console.log(user);
-      const {data}= await axios.post(`${serverUrl}/api/auth/google`, {
+      const {data}= await axios.post(`/api/auth/google`, {
         name: user.displayName,
         email: user.email,
         avatar: user.photoURL
