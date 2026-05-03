@@ -17,11 +17,9 @@ export const googleAuth = async (req, res) => {
       user = await User.create({ email, name, avatar });
     }
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     return res
       .cookie("token", token, {
@@ -37,9 +35,10 @@ export const googleAuth = async (req, res) => {
           name: user.name,
           email: user.email,
           avatar: user.avatar,
+          credits: user.credits,
+          plan: user.plan,
         },
       });
-
   } catch (error) {
     console.log(error);
     return res.status(500).json({

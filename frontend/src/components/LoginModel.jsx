@@ -3,25 +3,39 @@ import { AnimatePresence, motion } from "motion/react";
 import { signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../firebase";
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../redux/userSlice";
 import { serverUrl } from "../App.jsx";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const LoginModel = ({ open, onClose }) => {
-
+  const dispatch = useDispatch();
   const handlegoogleAuth = async () => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      console.log(user);
-      const {data}= await axios.post(`/api/auth/google`, {
-        name: user.displayName,
-        email: user.email,
-        avatar: user.photoURL
-      },{withCredentials: true});
-      console.log(data);
+      const { data } = await axios.post(
+        `/api/auth/google`,
+        {
+          name: user.displayName,
+          email: user.email,
+          avatar: user.photoURL,
+        },
+        { withCredentials: true },
+      );
+      dispatch(setUserData(data.user));
+      onClose();
+      toast.success("Logged in successfully", {
+        autoClose: 5000,
+      });
     } catch (error) {
       console.error("Error signing in with Google:", error);
+      toast.error("Failed to log in with Google", {
+        autoClose: 3000,
+      });
     }
-  }
+  };
 
   return (
     <AnimatePresence>

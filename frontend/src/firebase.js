@@ -12,7 +12,7 @@ const firebaseConfig = {
   projectId: "genwebai-ef9a5",
   storageBucket: "genwebai-ef9a5.firebasestorage.app",
   messagingSenderId: "1059961600770",
-  appId: "1:1059961600770:web:7af4343cbbdb668b3ca01b"
+  appId: "1:1059961600770:web:7af4343cbbdb668b3ca01b",
 };
 
 // Initialize Firebase
