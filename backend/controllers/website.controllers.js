@@ -58,13 +58,30 @@ const parseAIResponse = async (prompt) => {
 
   for (let i = 0; i < 3; i++) {
     raw = await generateResponse(
-      i === 0 ? prompt : prompt + "\nRETURN ONLY RAW JSON.",
+      i === 0 ? prompt : prompt + "\n\nCRITICAL: Return ONLY valid JSON with no extra text, markdown, or explanations. Format: {\"message\": \"confirmation\", \"code\": \"<html...>\"}",
     );
 
+    console.log(`AI Response Attempt ${i + 1}:`, raw);
+
     try {
-      parsed = JSON.parse(raw);
-      if (parsed.code) break;
-    } catch {
+      // Clean the response by removing any markdown code blocks
+      let cleanResponse = raw.trim();
+      if (cleanResponse.startsWith('```json')) {
+        cleanResponse = cleanResponse.replace(/^```json\s*/, '').replace(/\s*```$/, '');
+      } else if (cleanResponse.startsWith('```')) {
+        cleanResponse = cleanResponse.replace(/^```\s*/, '').replace(/\s*```$/, '');
+      }
+
+      parsed = JSON.parse(cleanResponse);
+      if (parsed && typeof parsed === 'object' && parsed.code && parsed.message) {
+        console.log('Successfully parsed AI response');
+        break;
+      } else {
+        console.log('Parsed response missing required fields:', parsed);
+        parsed = null;
+      }
+    } catch (error) {
+      console.log('JSON parse error:', error.message);
       parsed = null;
     }
   }
@@ -105,10 +122,16 @@ export const generateWebsite = async (req, res) => {
       });
     }
 
+    // Generate unique slug
+    const slug = prompt.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 60);
+    const randomSuffix = Math.random().toString(36).substring(2, 8);
+    const uniqueSlug = `${slug}-${randomSuffix}`;
+
     const website = await Website.create({
       user: user._id,
       title: prompt.slice(0, 60),
       latestCode: parsed.code,
+      slug: uniqueSlug,
       conversation: [
         {
           role: "user",
@@ -195,22 +218,29 @@ export const changes = async (req, res) => {
     }
 
     const updatePrompt = `
-${masterPrompt}
+You are a professional web developer. Update the existing website code with the requested changes.
 
-CURRENT WEBSITE CODE:
+EXISTING WEBSITE CODE:
 ${website.latestCode}
 
-UPDATE REQUEST:
+USER REQUEST:
 ${prompt}
 
-Preserve existing quality while implementing requested changes.
-`;
+INSTRUCTIONS:
+- Make the requested changes to the existing code
+- Keep all existing functionality and styling
+- Ensure the website remains responsive and professional
+- Return ONLY a valid JSON object with this exact format:
+{"message": "Brief confirmation of changes made", "code": "<complete updated HTML document>"}
+
+Do not include any explanations, markdown, or extra text outside the JSON.`;
 
     const parsed = await parseAIResponse(updatePrompt);
 
     if (!parsed || !parsed.code) {
+      console.error('AI failed to return valid response after 3 attempts');
       return res.status(400).json({
-        message: "AI returned invalid response",
+        message: "AI service temporarily unavailable. Please try again with a simpler request.",
       });
     }
 
@@ -299,7 +329,9 @@ export const deploy = async (req, res) => {
     }
 
     if (!website.slug) {
-      website.slug=website.title.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 60)+ "-" + website._id.toString().slice(-5);
+      const slug = website.title.toLowerCase().replace(/[^a-z0-9]+/g, "").slice(0, 60);
+      const randomSuffix = Math.random().toString(36).substring(2, 8);
+      website.slug = `${slug}-${randomSuffix}`;
     }
 
     website.deployed = true;

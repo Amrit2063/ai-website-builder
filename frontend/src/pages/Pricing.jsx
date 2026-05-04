@@ -4,104 +4,44 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { useSelector } from "react-redux";
 import axios from "axios";
-
-const plans = [
-  {
-    key: "free",
-    name: "Free",
-    price: "₹0",
-    credits: 100,
-    description: "Perfect to explore GenWeb.ai",
-    features: [
-      "AI website generation",
-      "Responsive HTML output",
-      "Basic animations",
-    ],
-    popular: false,
-    button: "Get Started",
-  },
-  {
-    key: "pro",
-    name: "Pro",
-    price: "₹499",
-    credits: 500,
-    description: "For serious creators & freelancers",
-    features: ["Everything in Free", "Faster generation", "Edit & regenerate"],
-    popular: true,
-    button: "Upgrade to Pro",
-  },
-  {
-    key: "enterprise",
-    name: "Enterprise",
-    price: "₹1499",
-    credits: 1000,
-    description: "For teams & power users",
-    features: [
-      "Unlimited iterations",
-      "Highest priority",
-      "Team collaboration",
-      "Dedicated support",
-    ],
-    popular: false,
-    button: "Contact Sales",
-  },
-];
+import {plans} from "../../utils/constant"
+import { toast } from "react-toastify";
 
 const Pricing = () => {
   const navigate = useNavigate();
-
-  // IMPORTANT:
-  // Your Redux screenshot shows:
-  // state.user.userData
-  // NOT state.user.UserData
   const userData = useSelector((state) => state.user.userData);
-
   const [loading, setLoading] = useState("");
 
   const handleBuy = async (planKey) => {
-    console.log("Selected Plan:", planKey);
-    console.log("Redux User:", userData);
 
-    // If no user → login
     if (!userData?._id) {
       navigate("/login");
       return;
     }
 
-    // Free plan → dashboard
     if (planKey === "free") {
       navigate("/dashboard");
       return;
     }
 
-    // Paid plans → Stripe
     setLoading(planKey);
 
     try {
       const { data } = await axios.post(
         "/api/billing",
-        {
-          planType: planKey,
-        },
-        {
-          withCredentials: true,
-        }
+        { planType: planKey },
+        { withCredentials: true },
       );
-
-      console.log("Billing Response:", data);
 
       if (data?.sessionUrl) {
         window.location.href = data.sessionUrl;
       } else {
-        console.error("Stripe session URL missing");
-        alert("Payment session could not be created.");
+        toast("Payment session could not be created.");
       }
     } catch (error) {
-      console.error("Billing Error:", error.response?.data || error.message);
-
-      alert(
+      toast(
         error.response?.data?.message ||
-          "Something went wrong while processing payment."
+          "Something went wrong while processing payment.",
       );
     } finally {
       setLoading("");
@@ -119,7 +59,7 @@ const Pricing = () => {
       {/* Back Button */}
       <button
         onClick={() => navigate("/")}
-        className="relative z-10 mb-8 flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition"
+        className="relative z-10 mb-8 flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition cursor-pointer"
       >
         <ArrowLeft size={16} />
         Back
@@ -195,11 +135,11 @@ const Pricing = () => {
               whileTap={{ scale: 0.96 }}
               disabled={loading === p.key}
               onClick={() => handleBuy(p.key)}
-              className={`w-full py-3 rounded-xl font-semibold transition ${
+              className={`w-full py-3 rounded-xl font-semibold transition cursor-pointer ${
                 p.popular
                   ? "bg-indigo-500 hover:bg-indigo-600"
                   : "bg-white/10 hover:bg-white/20"
-              } disabled:opacity-60`}
+              } disabled:opacity-60 disabled:cursor-not-allowed`}
             >
               {loading === p.key ? "Processing..." : p.button}
             </motion.button>

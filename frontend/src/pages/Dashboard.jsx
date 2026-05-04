@@ -4,7 +4,6 @@ import { motion } from "motion/react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-// import { set } from "mongoose";
 
 const Dashboard = () => {
   const { userData } = useSelector((state) => state.user);
@@ -61,7 +60,7 @@ const Dashboard = () => {
     setTimeout(() => setCopiedId(null), 2000);
   };
   return (
-    <div className="min-h-screen bg-[#050505] text-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#0f0f1a] via-[#1a103d] to-[#09090f] text-white">
       {/* Top Navbar */}
       <div className="sticky top-0 z-40 backdrop-blur-xl bg-black/50 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
