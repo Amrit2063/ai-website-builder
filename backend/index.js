@@ -31,11 +31,16 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
+app.get("/", (req, res) => {
+  res.status(200).json({ message: "This is WebNest.ai API" });
+});
+
 // 🔥 ROUTES AFTER
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/website", websiteRouter);
 app.use("/api/billing", billingRouter);
+
 
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
