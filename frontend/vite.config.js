@@ -6,7 +6,7 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   server: {
     proxy: {
-      '/api': 'http://localhost:5000', // proxy API requests to the backend server
+      '/api': 'https://webnest-api.vercel.app', // proxy API requests to the backend server
     },
   },
   plugins: [react(),tailwindcss()],
